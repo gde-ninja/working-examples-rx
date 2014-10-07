@@ -30,41 +30,41 @@ public class Lorem {
 	 * @return
 	 */
 	public static Observable<Lorem> loadLorem(final Context context) {
-		return Observable.create(
-			new Observable.OnSubscribe<Lorem>() {
-				@Override
-				public void call(Subscriber<? super Lorem> subscriber) {
-					// Not a fan of the double-try-catch here.
-					// TODO: Change example to use apache commons-io.
-					try {
-						// Get an input stream that points to the asset.
-						InputStream is = context.getAssets().open("lorem.txt");
-						try {
-							// Create lorem instance.
-							Lorem lorem = new Lorem();
-							// Load the text from the input stream.
-							lorem.loremText = slurp(is, 2048);
+        Observable.OnSubscribe<Lorem> onSubscribe = new Observable.OnSubscribe<Lorem>() {
+            @Override
+            public void call(Subscriber<? super Lorem> subscriber) {
+                // Not a fan of the double-try-catch here.
+                // TODO: Change example to use apache commons-io.
+                try {
+                    // Get an input stream that points to the asset.
+                    InputStream is = context.getAssets().open("lorem.txt");
+                    try {
+                        // Create lorem instance.
+                        Lorem lorem = new Lorem();
+                        // Load the text from the input stream.
+                        lorem.loremText = slurp(is, 2048);
 
-							// Call the subscriber with the new lorem.
-							subscriber.onNext(lorem);
+                        // Call the subscriber with the new lorem.
+                        subscriber.onNext(lorem);
 
-						} catch (IOException e) {
-							// Forward exceptions to onError()
-							subscriber.onError(e);
-						} finally {
-							// Making sure to close the input stream.
-							is.close();
-						}
-					} catch (IOException e) {
-						// Forward exceptions to onError()
-						subscriber.onError(e);
-					}
+                    } catch (IOException e) {
+                        // Forward exceptions to onError()
+                        subscriber.onError(e);
+                    } finally {
+                        // Making sure to close the input stream.
+                        is.close();
+                    }
+                } catch (IOException e) {
+                    // Forward exceptions to onError()
+                    subscriber.onError(e);
+                }
 
-					// Our job is done.
-					subscriber.onCompleted();
-				}
-			})
-			// We subscribe on io schedulers since we're I/O limited. (i.e. loading content on disk)
+                // Our job is done.
+                subscriber.onCompleted();
+            }
+        };
+        return Observable.create(onSubscribe)
+            // We subscribe on io schedulers since we're I/O limited. (i.e. loading content on disk)
 			.subscribeOn(Schedulers.io());
 	}
 
